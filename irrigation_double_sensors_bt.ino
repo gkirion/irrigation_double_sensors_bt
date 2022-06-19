@@ -31,20 +31,21 @@ void loop() {
   float pot_without_tray_moisture = analogRead(POT_WITHOUT_TRAY);
   digitalWrite(POT_WITH_TRAY_POWER, LOW);
   digitalWrite(POT_WITHOUT_TRAY_POWER, LOW);
+  
   MyBlue.print("pot with tray,");
-  MyBlue.print("moisture: ");
-  MyBlue.println(MAX_SENSOR_VALUE - pot_with_tray_moisture);
+  MyBlue.print(MAX_SENSOR_VALUE - pot_with_tray_moisture);
+  MyBlue.print(",");
+  MyBlue.println(irrigation_status);
+  
   MyBlue.print("pot without tray,");
-  MyBlue.print("moisture: ");
-  MyBlue.println(MAX_SENSOR_VALUE - pot_without_tray_moisture);
+  MyBlue.print(MAX_SENSOR_VALUE - pot_without_tray_moisture);
+  MyBlue.print(",");
+  MyBlue.println(irrigation_status);
+  
   if (MyBlue.available() > 0) {
     char command = MyBlue.read();
     switch (command) {
-      case 'S':
-        MyBlue.print("irrigation: ");
-        MyBlue.println(irrigation_status);
-        break;
-        
+      
        case '1':
         digitalWrite(IRRIGATION_SIGNAL, HIGH);
         irrigation_status = '1';
