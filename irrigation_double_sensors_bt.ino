@@ -1,63 +1,105 @@
 #include <SoftwareSerial.h> 
 SoftwareSerial MyBlue(2, 3); // RX | TX 
 
-#define POT_WITH_TRAY A0
-#define POT_WITHOUT_TRAY A1
-#define POT_WITH_TRAY_POWER 6
-#define POT_WITHOUT_TRAY_POWER 7
-#define IRRIGATION_SIGNAL 8
+#define PLACE_1_NAME "pot with tray"
+#define PLACE_2_NAME "pot without tray"
+
+#define PLACE_1_SENSOR_INPUT A0
+#define PLACE_2_SENSOR_INPUT A1
+
+#define PLACE_1_SENSOR_POWER 6
+#define PLACE_2_SENSOR_POWER 7
+
+#define PLACE_1_IRRIGATION_SIGNAL 8
+#define PLACE_2_IRRIGATION_SIGNAL 9
+
 #define MAX_SENSOR_VALUE 1023
 
-char irrigation_status; // 1 ON | 0 OFF
+char place_1_irrigation_status, place_2_irrigation_status; // 1 ON | 0 OFF
 
 void setup() {
   // put your setup code here, to run once:
-  pinMode(POT_WITH_TRAY_POWER, OUTPUT);
-  pinMode(POT_WITHOUT_TRAY_POWER, OUTPUT);
-  pinMode(IRRIGATION_SIGNAL, OUTPUT);
-  digitalWrite(POT_WITH_TRAY_POWER, LOW);
-  digitalWrite(POT_WITHOUT_TRAY_POWER, LOW);
-  digitalWrite(IRRIGATION_SIGNAL, LOW);
-  irrigation_status = '0';
+  pinMode(PLACE_1_SENSOR_POWER, OUTPUT);
+  pinMode(PLACE_2_SENSOR_POWER, OUTPUT);
+  pinMode(PLACE_1_IRRIGATION_SIGNAL, OUTPUT);
+  pinMode(PLACE_2_IRRIGATION_SIGNAL, OUTPUT);
+  
+  digitalWrite(PLACE_1_SENSOR_POWER, LOW);
+  digitalWrite(PLACE_2_SENSOR_POWER, LOW);
+  digitalWrite(PLACE_1_IRRIGATION_SIGNAL, LOW);
+  digitalWrite(PLACE_2_IRRIGATION_SIGNAL, LOW);
+  
+  place_1_irrigation_status = '0';
+  place_2_irrigation_status = '0';
   MyBlue.begin(9600);
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  digitalWrite(POT_WITH_TRAY_POWER, HIGH);
-  digitalWrite(POT_WITHOUT_TRAY_POWER, HIGH);
+  digitalWrite(PLACE_1_SENSOR_POWER, HIGH);
+  digitalWrite(PLACE_2_SENSOR_POWER, HIGH);
   delay(10);
-  float pot_with_tray_moisture = analogRead(POT_WITH_TRAY);
-  float pot_without_tray_moisture = analogRead(POT_WITHOUT_TRAY);
-  digitalWrite(POT_WITH_TRAY_POWER, LOW);
-  digitalWrite(POT_WITHOUT_TRAY_POWER, LOW);
+  float place_1_moisture = analogRead(PLACE_1_SENSOR_INPUT);
+  float place_2_moisture = analogRead(PLACE_2_SENSOR_INPUT);
+  digitalWrite(PLACE_1_SENSOR_POWER, LOW);
+  digitalWrite(PLACE_2_SENSOR_POWER, LOW);
   
-  MyBlue.print("pot with tray,");
-  MyBlue.print(MAX_SENSOR_VALUE - pot_with_tray_moisture);
+  MyBlue.print(PLACE_1_NAME);
   MyBlue.print(",");
-  MyBlue.println(irrigation_status);
+  MyBlue.print(MAX_SENSOR_VALUE - place_1_moisture);
+  MyBlue.print(",");
+  MyBlue.println(place_1_irrigation_status);
   
-  MyBlue.print("pot without tray,");
-  MyBlue.print(MAX_SENSOR_VALUE - pot_without_tray_moisture);
+  MyBlue.print(PLACE_2_NAME);
   MyBlue.print(",");
-  MyBlue.println(irrigation_status);
+  MyBlue.print(MAX_SENSOR_VALUE - place_2_moisture);
+  MyBlue.print(",");
+  MyBlue.println(place_2_irrigation_status);
   
   if (MyBlue.available() > 0) {
-    char command = MyBlue.read();
-    switch (command) {
+    String input = MyBlue.readStringUntil('\n');
+    input = input.substring(0, input.length() - 1); // strip carriage return
+    int split_index = input.indexOf(',');
+    String place = input.substring(0, split_index);
+    char command = input.charAt(split_index + 1);
+    
+    if (place.equals(PLACE_1_NAME)) {
+       
+       switch (command) {
       
-       case '1':
-        digitalWrite(IRRIGATION_SIGNAL, HIGH);
-        irrigation_status = '1';
-        break;
-
-      case '0':
-        digitalWrite(IRRIGATION_SIGNAL, LOW);
-        irrigation_status = '0';
-        break; 
-
-      default:
-        break;
+         case '1':
+          digitalWrite(PLACE_1_IRRIGATION_SIGNAL, HIGH);
+          place_1_irrigation_status = '1';
+          break;
+  
+        case '0':
+          digitalWrite(PLACE_1_IRRIGATION_SIGNAL, LOW);
+          place_1_irrigation_status = '0';
+          break; 
+  
+        default:
+          break;
+      }
+      
+    } 
+    else if (place.equals(PLACE_2_NAME)) {
+      
+       switch (command) {
+      
+         case '1':
+          digitalWrite(PLACE_2_IRRIGATION_SIGNAL, HIGH);
+          place_2_irrigation_status = '1';
+          break;
+  
+        case '0':
+          digitalWrite(PLACE_2_IRRIGATION_SIGNAL, LOW);
+          place_2_irrigation_status = '0';
+          break; 
+  
+        default:
+          break;
+      }
+      
     }
   }
   delay(6000);
