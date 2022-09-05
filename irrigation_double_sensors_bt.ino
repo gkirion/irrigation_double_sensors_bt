@@ -35,27 +35,8 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  digitalWrite(PLACE_1_SENSOR_POWER, HIGH);
-  digitalWrite(PLACE_2_SENSOR_POWER, HIGH);
-  delay(10);
-  float place_1_moisture = analogRead(PLACE_1_SENSOR_INPUT);
-  float place_2_moisture = analogRead(PLACE_2_SENSOR_INPUT);
-  digitalWrite(PLACE_1_SENSOR_POWER, LOW);
-  digitalWrite(PLACE_2_SENSOR_POWER, LOW);
-  
-  MyBlue.print(PLACE_1_NAME);
-  MyBlue.print(",");
-  MyBlue.print(MAX_SENSOR_VALUE - place_1_moisture);
-  MyBlue.print(",");
-  MyBlue.println(place_1_irrigation_status);
-  
-  MyBlue.print(PLACE_2_NAME);
-  MyBlue.print(",");
-  MyBlue.print(MAX_SENSOR_VALUE - place_2_moisture);
-  MyBlue.print(",");
-  MyBlue.println(place_2_irrigation_status);
-  
+
+  // receive commands
   if (MyBlue.available() > 0) {
     String input = MyBlue.readStringUntil('\n');
     input = input.substring(0, input.length() - 1); // strip carriage return
@@ -102,5 +83,28 @@ void loop() {
       
     }
   }
+
+  // read sensors
+  digitalWrite(PLACE_1_SENSOR_POWER, HIGH);
+  digitalWrite(PLACE_2_SENSOR_POWER, HIGH);
+  delay(10);
+  float place_1_moisture = analogRead(PLACE_1_SENSOR_INPUT);
+  float place_2_moisture = analogRead(PLACE_2_SENSOR_INPUT);
+  digitalWrite(PLACE_1_SENSOR_POWER, LOW);
+  digitalWrite(PLACE_2_SENSOR_POWER, LOW);
+
+  // send sensors values and irrigation status
+  MyBlue.print(PLACE_1_NAME);
+  MyBlue.print(",");
+  MyBlue.print(MAX_SENSOR_VALUE - place_1_moisture);
+  MyBlue.print(",");
+  MyBlue.println(place_1_irrigation_status);
+  
+  MyBlue.print(PLACE_2_NAME);
+  MyBlue.print(",");
+  MyBlue.print(MAX_SENSOR_VALUE - place_2_moisture);
+  MyBlue.print(",");
+  MyBlue.println(place_2_irrigation_status);
+  
   delay(6000);
 }
